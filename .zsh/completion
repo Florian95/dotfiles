@@ -1,0 +1,42 @@
+autoload -U compinit
+compinit
+
+# pasting with tabs doesn't perform completion
+zstyle ':completion:*' insert-tab pending
+
+#zstyle ':completion:*::::' completer _expand _complete _ignored _approximate
+zstyle ':completion:*' completer _expand _complete _match _prefix _approximate _list
+
+zstyle ':completion:*' menu select=1
+zstyle ':completion:*' list-colors ${(s.:.)ZLS_COLORS}
+zstyle ':completion:*' file-sort name
+zstyle ':completion:*' matcher-list 'r:|[._-]=** r:|=**' 'l:|=** r:|=**'
+#zstyle ':completion:*' menu select
+
+
+hosts=()
+[ -r $HOME/.ssh/config ] && hosts=($hosts ${${${${(f)"$(<$HOME/.ssh/config)"}:#[^H]*}##Host }##[*0-9]*})
+[ -r $HOME/.ssh/known_hosts ] && hosts=($hosts ${${${${(f)"$(<$HOME/.ssh/known_hosts)"}:#[0-9]*}%%\ *}%%,*})
+zstyle ':completion:*' hosts $hosts
+zstyle ':completion:*:hosts' list-colors '=(#b)(*)(e-lam.net)=01;36=31;31' '=[^.]#=01;31'
+
+zstyle ':completion:*:rm:*' ignore-line yes
+zstyle ':completion:*:mv:*' ignore-line yes
+zstyle ':completion:*:cp:*' ignore-line yes
+
+# insère toutes les possibilités pour le completer expand 
+zstyle ':completion:*:expand:*' tag-order all-expansions  
+
+# formatage et décoration 
+zstyle ':completion:*' verbose yes 
+zstyle ':completion:*:descriptions' format '%B%d%b' 
+zstyle ':completion:*:messages' format '%d' 
+zstyle ':completion:*:warnings' format 'No matches for: %d' 
+zstyle ':completion:*:corrections' format '%B%d (errors: %e)%b' 
+zstyle ':completion:*' group-name ''  # autorise un caractère sur trois à être une erreur de typo 
+zstyle -e ':completion:*:approximate:*' max-errors par 'reply=( $(( ($#PREFIX+$#SUFFIX)/3 )) numeric )'
+
+# matches case insensitive for lowercase
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
+
+zstyle ':completion:*:*:kill:*:processes' list-colors "=(#b) #([0-9]#)*=36=31"

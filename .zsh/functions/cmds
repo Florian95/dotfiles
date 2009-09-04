@@ -1,0 +1,22 @@
+function cmds () {
+    # This lets us iterate per line instead of over count then cmd:
+    export IFS=$'\n'
+    export HISTORY_LENGTH=`history | wc -l`
+    export TOP_TEN_CMDS=`history | awk '{print $5}' | sort | uniq -c | sort -n | tail -n 10`
+    export START_DATE=`history | awk '{print $2}' | sort | uniq | sort -r | tail -n 1`
+    export END_DATE=`history | awk '{print $2}' | sort | uniq | sort | tail -n 1`
+    echo -e "\033[34mTop ten most used commands (Count, Command, % of history):\033[0m "
+    # Show the 10 most common commands, with percentage of total, in red if 10 chars or more.
+    for CMD in $TOP_TEN_CMDS; do
+        export CMD_COUNT=`echo $CMD | awk '{print $1}'`
+        export CMD_PERCENT=`echo "scale=4; $CMD_COUNT / $HISTORY_LENGTH" | bc`
+        export SHORT_CMD=`echo $CMD | awk '{print $2}'`
+        if [ ${#SHORT_CMD} -ge 10 ]; then
+            echo -e "\033[31m * $CMD ($CMD_PERCENT%)\033[0m - Length ${#SHORT_CMD}, might want to form an alias for this."
+        else
+            echo " * $CMD ($CMD_PERCENT%)"
+        fi
+    done
+    echo -e "\033[34m$HISTORY_LENGTH lines in history from $START_DATE to $END_DATE.\033[0m"
+    unset IFS
+}
